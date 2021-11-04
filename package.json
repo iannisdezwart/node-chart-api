@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@types/jsonwebtoken": "^8.5.5",
+    "@types/node": "^16.11.6",
+    "canvas": "^2.8.0",
+    "chart.js": "^3.6.0",
+    "jsonwebtoken": "^8.5.1"
+  }
+}
