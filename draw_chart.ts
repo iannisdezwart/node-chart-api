@@ -17,10 +17,6 @@ const BackgroundPlugin: ChartJS.Plugin = {
 	}
 }
 
-/*
-{"type":"line","data":{"labels":["a","b","c"],"datasets":[{"label":"My First dataset","data":[10,20,30],"backgroundColor":"red","borderColor":"blue","borderWidth":1}]},"options":{"scales":{"y":{"beginAtZero":true}}}}
-*/
-
 /**
  * Creates a chart from a JSON body.
  *
@@ -63,6 +59,8 @@ export const drawChart = async (
 		chart.plugins = []
 	}
 
+	chart.plugins.push(BackgroundPlugin)
+
 	try {
 		new ChartJS.Chart(ctx, chart)
 	}
@@ -95,6 +93,8 @@ export const drawChart = async (
  * * X-Title = chart title
  * * X-Width = width of the chart
  * * X-Height = height of the chart
+ * * X-Scale-X-Type = scale type of the x axis (linear, logarithmic)
+ * * X-Scale-Y-Type = scale type of the y axis (linear, logarithmic)
  *
  * Example format of a body:
  * * 2018, 2019, 2020, 2021
@@ -112,7 +112,11 @@ export const drawChartCSV = async (
 	const width = +(req.headers['x-width'] ?? '600')
 	const height = +(req.headers['x-height'] ?? '400')
 	const chartType = req.headers['x-chart-type'] ?? 'line'
+	const scaleXType = req.headers['x-scale-x-type'] ?? 'linear'
+	const scaleYType = req.headers['x-scale-y-type'] ?? 'linear'
 	const title = req.headers['x-title']
+	const xLabel = req.headers['x-label-x']
+	const yLabel = req.headers['x-label-y']
 
 	if (!chartTypes.includes(chartType as string)) {
 		res.statusCode = 400
@@ -143,7 +147,16 @@ export const drawChartCSV = async (
 			datasets: []
 		},
 		plugins: [ BackgroundPlugin ],
-		options: {}
+		options: {
+			scales: {
+				x: {
+					type: scaleXType as keyof ChartJS.ScaleTypeRegistry
+				},
+				y: {
+					type: scaleYType as keyof ChartJS.ScaleTypeRegistry
+				}
+			}
+		}
 	}
 
 	for (let i = 0; i < numberOfDatasets; i++) {
@@ -184,6 +197,32 @@ export const drawChartCSV = async (
 					size: 20,
 					family: 'Arial',
 				}
+			}
+		}
+	}
+
+	if (xLabel != null) {
+		// @ts-ignore
+		chart.options.scales.y.title = {
+			display: true,
+			text: xLabel,
+			color: 'black',
+			font: {
+				size: 20,
+				family: 'Arial',
+			}
+		}
+	}
+
+	if (yLabel != null) {
+		// @ts-ignore
+		chart.options.scales.y.title = {
+			display: true,
+			text: yLabel,
+			color: 'black',
+			font: {
+				size: 20,
+				family: 'Arial',
 			}
 		}
 	}
